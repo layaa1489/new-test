@@ -1,0 +1,195 @@
+import pyttsx3
+import datetime
+import speech_recognition as sr
+import wikipedia
+import webbrowser
+import smtplib
+import pyaudio
+import os
+from tkinter import *
+from tkinter import ttk
+from ttkthemes import themed_tk as tk
+import pyjokes
+import pyautogui
+import pyowm,json
+import psutil
+import requests
+
+
+
+
+
+
+engine = pyttsx3.init('sapi5')
+
+
+
+
+
+
+
+def speak(audio):
+    engine.say(audio)
+    engine.runAndWait()
+
+def wishMe():
+    hour = int(datetime.datetime.now().hour)
+
+    if hour >= 0 and hour < 6:
+        speak("Hey Owl")
+
+    elif hour >= 6 and hour < 12:
+        speak("Good Morning")
+
+    elif hour >= 12 and hour < 18:
+        speak("Good Afternoon")
+
+    else:
+        speak("Hello ")
+
+    speak("I'm virtual assistant")
+    speak("Please tell me how may i help you ?")
+
+
+def takeCommand():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening....")
+        r.pause_threshold = 1
+        audio = r.listen(source)
+
+    try:
+        print("Recognising.....")
+        query = r.recognize_google(audio, language='en-in')
+        print(f"User said: {query}\n")
+    except Exception as e:
+        print(e)
+        print("Say that again please.....")
+        return "None"
+    return query
+
+
+def sendEmail(to, content):
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.ehlo()
+    server.starttls()
+    server.login('yourgmail@gmail.com', 'your-password')
+    server.sendmail('yourgmail@gmail.co', to, content)
+    server.close()
+
+def joke():
+    speak(pyjokes.get_jokes(language='en',category='all'))
+
+
+if __name__ == "__main__":
+    wishMe()
+    while True:
+        query = takeCommand().lower()
+
+        if 'wikipedia' in query:
+            speak('Searching Wikipedia....')
+            query = query.replace('wikipedia', '')
+            results = wikipedia.summary(query, sentences=2)
+            speak('According to wikipedia')
+            speak(results)
+            print(results)
+
+
+
+        elif 'open college website' in query:
+            webbrowser.open("mydy.dypatil.edu")
+
+        elif 'start youtube' in query:
+            webbrowser.open("youtube.com")
+
+        elif 'open Linkedin' in query:
+            webbrowser.open("Linkedin.com")
+
+        elif 'open instagram' in query:
+            webbrowser.open("instagram.com")
+
+        elif 'open dashboard' in query:
+            webbrowser.open("http://mydy.dypatil.edu/rait/my/")
+
+        elif 'open whatsapp' in query:
+            webbrowser.open("https://web.whatsapp.com/")
+
+        
+
+        elif 'the time' in query:
+            strTime = datetime.datetime.now().strftime("%H,%M,%S")
+            speak(f"Sir, the time is {strTime}")
+
+
+
+        elif 'email to omkar' in query:
+            try:
+                speak("What should I say?")
+                content = takeCommand()
+                to = "yourgmail@gmail.co"
+                sendEmail(to, content)
+                speak("Email has been sent!")
+            except Exception as e:
+                print(e)
+                speak("Sorry sir. I am not able to send this email")
+
+        elif 'shutdown' in query:
+            print("shutting down...")
+            speak("shutting down")
+            quit()
+
+    
+
+        elif 'joke' in query:
+            joke()
+
+        
+
+        elif 'weather' in query:
+            owm = pyowm.OWM('8cb4095e2bea10163fb53b6c2819c06e')
+            city = 'bangalore'
+            loc = owm.weather_at_place(city)
+            weather = loc.get_weather()
+            temp=weather.get_temperature(unit='celsius')
+            speak(temp)
+            
+        elif 'google news' in query:
+            main_url = "https://newsapi.org/v2/top-headlines?sources=google-news-in&apikey=4db397da6cd44bb292fe4346b44a14c5"
+            open_google_page = requests.get(main_url).json()
+            articles = open_google_page["articles"]
+            speak(articles)
+    
+
+        
+
+        elif 'battery level' in query:
+            battery = psutil.sensors_battery()
+            percent = battery.percent
+            power_plugged=battery.power_plugged
+            speak(percent)
+            speak(power_plugged)
+            
+            
+            
+
+
+
+
+
+
+
+main()
+
+root_1 = tk.ThemedTk()
+root_1.set_theme('radiance')
+root_1.title("Virtual assistant")
+root_1.geometry("400x350")
+lbl1=ttk.Label(master=root_1, text="Welcome to virtual assistant app\n\n", wraplength=600)
+lbl1.pack()
+but1 = ttk.Button(root_1, text="Run the assistant🤖🔊", command=main)
+but1.config(width=22)
+but1.pack(padx=10, pady=10)
+quit4 = ttk.Button(root_1, text="EXIT", command=root_1.destroy)
+quit4.config(width=22)
+quit4.pack(padx=10, pady=20)
+root_1.mainloop()
